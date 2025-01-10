@@ -39,14 +39,16 @@ Les données utilisées proviennent du Behance Dataset Repository :
   - `Behance_appreciate_1M`
   - `Behance_Item_to_Owners`
 
+
 ### Étapes
+
 1. **Cloner ce dépôt :**
    ```bash
    git clone <URL-du-dépôt>
    ```
 
 2. **Installer les bibliothèques nécessaires :**
-   installez les dépendances manuellement :
+   Installez les dépendances manuellement :
    ```bash
    pip install pandas
    ```
@@ -64,29 +66,30 @@ Les données utilisées proviennent du Behance Dataset Repository :
 
 4. **Charger les données dans Neo4j :**
    - Placez les fichiers CSV générés dans le répertoire `import` de Neo4j.
-   - Ouvrez Neo4j Desktop ou connectez-vous à votre serveur Neo4j.
-   - Importez les fichiers dans Neo4j en exécutant les requêtes Cypher suivantes dans Neo4j Browser :
-     - **Création des nœuds User** :
+   - Ouvrez **Neo4j Desktop** ou connectez-vous à votre serveur Neo4j.
+   - Importez les fichiers en exécutant les requêtes Cypher suivantes dans Neo4j Browser :
+
+     - **Création des nœuds User :**
        ```cypher
        LOAD CSV WITH HEADERS FROM 'file:///cleaned_Behance_appreciate_part_1.csv' AS row
        MERGE (user:User {id: row.user_id});
        ```
        Répétez cette commande pour les autres parties.
 
-     - **Création des relations LIKED** :
+     - **Création des relations LIKED :**
        ```cypher
        LOAD CSV WITH HEADERS FROM 'file:///cleaned_Behance_appreciate_part_1.csv' AS row
        MATCH (user:User {id: row.user_id})
        MATCH (item:Item {id: row.item_id})
        CREATE (user)-[:LIKED {timestamp: row.timestamp}]->(item);
        ```
-       Répétez cette commande pour toutes les parties.
+       Répétez cette commande pour les autres parties.
 
-     - **Création des nœuds Item et Owner** :
+     - **Création des nœuds Item et Owner :**
        Utilisez des requêtes similaires pour les fichiers `cleaned_Behance_Item_to_Owners`.
 
 5. **Exécuter les recommandations :**
-   - Lancez la requête Cypher pour générer des recommandations :
+   - Lancez la requête Cypher suivante pour générer des recommandations :
      ```cypher
      MATCH (user:User {id: '1238354'})-[:LIKED]->(item:Item)<-[:LIKED]-(similar:User)
      MATCH (similar)-[:LIKED]->(recommendedItem:Item)
